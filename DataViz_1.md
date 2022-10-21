@@ -1,0 +1,409 @@
+---
+title: "Домашняя работа №1"
+author: "Anna Antonova"
+date: "2022-10-17"
+output: 
+  html_document:
+    keep_md: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+library(ggplot2)
+library(ggpubr)
+library (dplyr)
+library (readr)
+```
+
+# Домашняя работа №1
+
+ 
+
+ 
+
+
+
+## задание 1
+
+ 
+
+insurance_cost <- read_csv("data/insurance_cost.csv")
+
+head(insurance_cost)
+
+```{r}
+str(insurance_cost)
+```
+
+```{r}
+summary(insurance_cost)
+```
+
+## задание 2
+
+ 
+
+```{r}
+ggplot(data = insurance_cost, 
+       aes(x = age)) +
+  geom_histogram()
+```
+
+```{r}
+ggplot(data = insurance_cost, 
+       aes(x = bmi)) +
+  geom_histogram()
+```
+
+```{r}
+ggplot(data = insurance_cost, 
+       aes(x = children)) +
+  geom_histogram()
+```
+
+```{r}
+ggplot(data = insurance_cost, 
+       aes(x = charges)) +
+  geom_histogram()
+```
+
+## задание 3
+
+ 
+
+charges_mean \<- round(mean(insurance_cost$charges),1) charges_median <- round(median(insurance_cost$charges),2)
+
+```{r}
+ggplot(data = insurance_cost, 
+       aes(x = charges)) +
+  geom_density()+
+ theme_bw() +
+  ggtitle('График плотности по расходам СК') + 
+  labs(y = 'Плотность', x = 'Расходы') +
+  theme( 
+    title = element_text(size = 8.7), 
+    axis.title.y = element_text(size=8) 
+    
+    ) +
+   geom_vline(aes(xintercept = charges_median), color = "red") +
+  annotate("text", 
+           x= charges_median+6500,
+           y=6e-05, 
+           label=paste0("Median=", charges_median), color = "red")+
+  geom_vline(aes(xintercept = charges_mean), color = "blue") +
+  annotate("text", 
+           x= charges_mean+7000, 
+           y=5e-05, 
+           label=paste0("Mean=", charges_mean), color = "blue")
+```
+
+## задание 4
+
+ 
+
+```{r}
+ggplot() +
+  geom_boxplot(data = insurance_cost, 
+               aes(x = sex, y = charges)) +
+  theme_gray()+ 
+  labs(y = 'Расходы', x = 'Пол')
+```
+
+```{r}
+ggplot() +
+  geom_boxplot(data = insurance_cost, 
+               aes(x = smoker, y = charges)) +
+  theme_gray()+ 
+  labs(y = 'Расходы', x = 'Факт курения')
+```
+
+```{r}
+ggplot() +
+  geom_boxplot(data = insurance_cost, 
+               aes(x = region, y = charges)) +
+  theme_gray()+ 
+  labs(y = 'Расходы', x = 'Регион')
+```
+
+## задание 5
+
+ 
+
+install.packages ("ggpubr")
+
+```{r}
+geom_density <- ggplot(data = insurance_cost, 
+       aes(x = charges)) +
+  geom_density()+
+ theme_bw() +
+  ggtitle('График плотности по расходам страховой компании') + 
+  labs(y = 'Плотность', x = 'Расходы') +
+  theme( 
+    title = element_text(size = 5), 
+    axis.title.y = element_text(size=8)  
+    ) +
+   geom_vline(aes(xintercept = charges_median), color = "red") +
+  annotate("text", 
+           x= charges_median+6000,
+           y=6e-05, 
+           label=paste0("Median=", charges_median), color = "red")+
+  geom_vline(aes(xintercept = charges_mean), color = "blue") +
+  annotate("text", 
+           x= charges_mean+7000, 
+           y=5e-05, 
+           label=paste0("Mean=", charges_mean), color = "blue")
+
+box_plot1 <-ggplot() +
+  geom_boxplot(data = insurance_cost, 
+               aes(x = sex, y = charges)) +
+  theme_gray()+ 
+  labs(y = 'Расходы', x = 'Пол')
+  
+
+box_plot2 <-ggplot() +
+  geom_boxplot(data = insurance_cost, 
+               aes(x = smoker, y = charges)) +
+  theme_gray()+ 
+  labs(y = 'Расходы', x = 'Факт курения')
+
+box_plot3 <-ggplot() +
+  geom_boxplot(data = insurance_cost, 
+               aes(x = region, y = charges)) +
+  theme_gray()+ 
+  labs(y = 'Расходы', x = 'Регион')
+  
+  
+
+```
+
+```{r}
+library(ggpubr)
+
+
+figure <- ggarrange(geom_density,
+                          ggarrange (box_plot1, box_plot2, box_plot3, ncol = 3), nrow = 2)
+
+
+annotate_figure (figure, fig.lab = "Объединенный график", fig.lab.face = "bold", fig.lab.pos = "top")
+
+  
+
+
+```
+
+## задание 6
+
+ 
+
+```{r}
+insurance_cost %>% 
+ggplot(aes(x = charges, color = region, fill = region, group = region)) +
+  geom_density()+
+    facet_grid(. ~ region) +
+    theme_bw() +
+  ggtitle('График плотности по расходам СК') + 
+  labs(y = 'Плотность', x = 'Расходы') +
+  theme( 
+    title = element_text(size = 8.7), 
+    axis.title.y = element_text(size=8),
+    axis.text.x  = element_text(size=5)
+    
+    )
+```
+
+## задание 7
+
+ 
+
+```{r}
+insurance_cost %>% 
+  ggplot(aes(x=age, y=charges)) + 
+    geom_point(size=1)+
+ theme_grey() +
+  ggtitle('Диаграмма зависимости расходов СК от возраста') + 
+  labs(y = 'Расходы', x = 'Возраст') +
+  theme( 
+title = element_text(size = 10), 
+axis.text.x  = element_text(size=14)
+        )
+```
+
+## задание 8
+
+ 
+
+```{r}
+insurance_cost %>% 
+  ggplot(aes(x=age, y=charges)) + 
+    geom_point(size=1)+
+   geom_smooth(method=lm, 
+              color="blue", 
+              se=TRUE)+
+ theme_grey() +
+  ggtitle('Диаграмма зависимости расходов СК от возраста') + 
+  labs(y = 'Расходы', x = 'Возраст') +
+  theme( 
+title = element_text(size = 10), 
+axis.text.x  = element_text(size=14)
+        )
+```
+
+## задание 9
+
+ 
+
+```{r}
+insurance_cost %>% 
+  ggplot(aes(x=age, y=charges, fill = smoker, group = smoker)) +     geom_point(size=1)+
+   geom_smooth(method=lm, 
+              color="blue", 
+              se=TRUE 
+              )+
+ theme_grey() +
+  ggtitle('Диаграмма зависимости расходов СК от возраста') + 
+  labs(y = 'Расходы', x = 'Возраст') +
+  theme( 
+title = element_text(size = 10), 
+axis.text.x  = element_text(size=14)
+        )
+```
+
+## задание 10
+
+ 
+
+```{r}
+insurance_cost %>% 
+  ggplot(aes(x=bmi, y=charges, fill = smoker, group = smoker)) +     geom_point(size=1)+
+   geom_smooth(method=lm, 
+              color="blue", 
+              se=TRUE 
+              )+
+ theme_grey() +
+  ggtitle('Диаграмма зависимости расходов СК от ИМТ') + 
+  labs(y = 'Расходы', x = 'ИМТ') +
+  theme( 
+title = element_text(size = 10), 
+axis.text.x  = element_text(size=14)
+        )
+```
+
+## задание 11
+
+ 
+
+Вопрос: Чаще всего страховая компания оплачивала лечение многодетных индивидов или нет? Наглядно изобразим на графике barplot, который отразит сравнение двух абсолютных величин количество многодетных индивидов (3 и более детей) и немногодетных индивидами (2 и менее детей, включая бездетных), на лечение которых страховая компания затрачивала средства.
+
+```{r}
+insurance_cost <- insurance_cost %>% 
+  mutate(
+    children_group = case_when(
+      children >= 3 ~ ">3",
+      children <= 3 ~ "<= 3"
+          ))
+summary(insurance_cost)
+table(insurance_cost$children_group)
+```
+
+```{r}
+insurance_cost %>% 
+  ggplot(aes(x = children_group)) +
+  geom_bar () +
+  theme_test() +
+  ggtitle('График плотности по расходам СК') + 
+  labs(y = 'количество человек', x = 'количество детей') +
+  theme( 
+    title = element_text(size = 14), 
+    axis.title.y = element_text(size=12),
+    axis.title.x = element_text(size=12)
+  )
+```
+
+## задание 12
+
+ 
+
+Вопрос: на женщин в каком возрасте тратилась страховая компания больше? а если смотреть по отношению к мужчинам?
+
+```{r}
+insurance_cost %>% 
+   
+   ggplot(aes(x=age, y=charges, color = sex, fill = sex, group = sex)) + 
+  geom_point()+
+  geom_smooth(method=lm, se=TRUE) +
+  theme_bw()+
+ggtitle('Отношение возраста к расхода страховой компании') + 
+  labs(y = 'расходы', x = 'возраст') +
+  theme( 
+   title = element_text(size = 10), 
+axis.text.x  = element_text(size=6),
+axis.text.y  = element_text(size=6)
+  )
+```
+
+## задание 13
+
+ 
+
+Вопрос:Какое количество расходов у страховой компании на индивидов, которые курят? Проанализируется параметры в сравнении с некурящими. наглядно изобразим на графике boxplot,на которой сразу будет видна медиана, максимальное и минимальное значение расходов, а также выбросы
+
+```{r}
+insurance_cost <- insurance_cost %>% 
+    mutate(
+    smoker_ch = as.character(smoker))
+
+```
+
+```{r}
+ggplot() +
+  geom_boxplot(data = insurance_cost, 
+               aes(x = smoker_ch, y = charges, )) +
+  theme_light()+
+ggtitle('Расходы страховой компании в зависимости от статуса курения') +
+  labs(y = 'расходы', x = 'статус курения') +
+  theme( 
+   title = element_text(size = 12), 
+axis.text.x  = element_text(size=9),
+axis.text.y  = element_text(size=9)
+  )
+```
+
+## задание 14
+
+ 
+
+```{r}
+insurance_cost <- insurance_cost %>% 
+  mutate(
+    age_group = case_when(
+     age < 21  ~ "< 21",
+      age >= 21 & age < 35 ~ "21-34",
+      age >= 35 & age < 50 ~ "35-49",
+      age >= 50 ~ "50+"
+          ))
+summary(insurance_cost)
+table(insurance_cost$age_group)
+```
+
+```{r}
+insurance_cost %>% 
+  filter(age != 20, age != 19, age != 18) %>% 
+  ggplot(aes(x=bmi, y=charges, fill = age_group, group = age_group)) +     
+       geom_point(colour = '#996699', size=1)+
+         scale_y_log10()+
+   geom_smooth(method=lm, 
+              color = "red", 
+              se=TRUE 
+              )+
+  facet_grid(. ~ age_group) +
+ theme_minimal() +
+  ggtitle('Отношение индекса массы тела к логарифму трат по возрастным группам') + 
+  labs(y = 'log(charges)', x = 'bmi') +
+  theme( 
+title = element_text(size = 8), 
+axis.text.x  = element_text(size=6),
+axis.text.y  = element_text(size=6)
+        )
+```
