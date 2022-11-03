@@ -1,0 +1,146 @@
+---
+title: "HW1"
+author: "Anna"
+date: "2022-11-03"
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+    theme: flatly
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(ggplot2)
+library (dplyr)
+library (readr)
+library (pROC)
+library(tidyr)
+
+```
+
+
+
+# Домашняя работа №1
+
+ 
+
+ 
+
+
+```{r}
+
+diabetes <- read_csv ("~/data/diabetes.csv")
+
+```
+
+```{r}
+summary(diabetes)
+```
+```{r}
+d_data <- diabetes %>% 
+mutate_at(vars(Glucose, BloodPressure, SkinThickness, Insulin, BMI),
+            ~ ifelse(. == 0, NA, .)) 
+summary(d_data)
+```
+## задание 1
+
+ 
+
+
+```{r}
+d_data <- d_data %>% 
+       mutate(Glucose_cor = Glucose/18,
+         Glucose_group = case_when(
+      Glucose_cor >= 7.8 ~ "НТГ есть",
+      Glucose_cor < 7.8 ~ "НТГ нет"
+      ))
+
+summary(d_data)
+table(d_data$Glucose_group)
+    
+```
+
+Ответ: нарушение толерантности глюкозы наблюдается у 192 пациентов, без НТГ - 571 пациент. 
+
+## задание 2
+
+ 
+Ответ: переменная характеризующая уровень гликемии - это глюкоза, поэтому строим ROC-кривую по уровню глюкозы:
+
+```{r}
+
+roc_curve_1 <- roc(Outcome~ Glucose_cor, data = d_data, ci = T)
+
+roc_curve_1
+
+```
+
+```{r, fig.height= 2, fig.width=3, dpi=300}
+
+ggroc(roc_curve_1) + 
+    theme_bw()
+
+```
+## задание 3
+
+ 
+Ответ: площадь под кривой равна 0.7928: Area under the curve: 0.7928
+
+## задание 4
+
+ 
+Ответ: 95% двусторонний ДИ для площади под ROC-кривой равен: 95% CI: 0.7599-0.8257
+
+## задание 5
+
+ 
+
+```{r}
+
+roc_curve_2 <- roc(Outcome ~ Insulin, data = d_data, ci = T)
+
+roc_curve_2
+
+```
+
+```{r}
+
+roc_curve_2 %>% coords()
+
+```
+```{r}
+
+roc_curve_2 %>% coords(x = "best", best.method = "closest.topleft")
+
+```
+
+Ответ: оптимальным пороговым значением по уровню инсулина является 121, чувствительность - 0.7846154, специфичность - 0.6212121.
+
+## задание 6
+
+ 
+
+```{r}
+
+d_data %>% 
+    select(!Glucose_group) %>% 
+    pivot_longer(cols = !Outcome) %>% 
+    group_by(name) %>% 
+    summarise(AUC = roc(Outcome, value, ci = T)$ci[2] %>% round(3),
+              AUC_LCL = roc(Outcome, value, ci = T)$ci[1] %>% round(3),
+              AUC_UCL = roc(Outcome, value, ci = T)$ci[3] %>% round(3))
+
+```
+Ответ: 
+наибольшей площадью под ROC-кривой обладает Глюкоза, т.е. уровень глюкозы обладает лучшими диагностическими характеристиками из имеющихся в анализе.
+наименьшей площадью под ROC-кривой обладает индекс, отражающий вероятность наличия диабета на основании наследственного анамнеза
+
+
+
+
